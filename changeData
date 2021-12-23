@@ -1,0 +1,100 @@
+<?php
+
+session_start();
+
+if(!isset($_SESSION["session_username"])):
+	header("location:login.php");
+else:
+	?>
+	
+	<?php include("includes/header.php"); ?>
+
+	<div id="welcome">
+		<h2>Ваші данні, <span>
+
+			<?php 
+			$query = mysqli_query($con, "SELECT * FROM admin WHERE username = '".$_SESSION['session_username']."'");
+			$row=mysqli_fetch_assoc($query);
+			echo $row['full_name'];
+			?>!
+		</span></h2>
+	</div>
+
+	<div class="container mchangeData">
+	<div id="login">
+		<h1>Зміна данних</h1>
+		<form action="changeData.php" id="changeform" method="post"name="changeform">
+			
+			<p><label for="user_login">Імя<br>
+				<input class="input" id="full_name" name="full_name"size="32"  type="text" value="<?php echo $row['full_name']; ?>"></label></p>
+
+						<p><label for="user_pass">E-mail<br>
+							<input class="input" id="email" name="email" size="32"type="email" value="<?php echo $row['email']; ?>"></label></p>
+						
+							<p><label for="user_pass">Пароль<br>
+								<input class="input" id="password" name="password"size="32"   type="password" value="<?php echo $row['password']; ?>"></label></p>
+
+							<p class="submit"><input class="button" id="changeData" name= "changeData" type="submit" value="Зберегти"></p>
+							<p class="submit"><input class="button" id="cancel" name= "cancel" type="submit" value="Скасувати"></p>
+						</form>
+					</div>
+				</div>
+
+
+	<?php
+	if(isset($_POST['changeData']))
+	{
+		if($_POST['full_name'] != " "  && $_POST['email'] != " " && $_POST['password'] != " ") {
+			$_POST['full_name'] = filter_var($_POST['full_name'], FILTER_SANITIZE_STRING);
+			$_POST['email'] = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
+			$_POST['password'] = filter_var($_POST['password'], FILTER_SANITIZE_STRING);
+			if($_POST['full_name'] == "" ||  $_POST['email'] == "" || $_POST['password'] == ""){
+				$message = "Введите корректные данные!";
+			} else
+			{
+				$query=mysqli_query($con, "SELECT * FROM admin WHERE email='".$row['email']."'");
+				$numrows=mysqli_num_rows($query);
+				if($numrows==0 || $_POST['email'] == $row['email'])
+				{
+					$full_name= htmlspecialchars($_POST['full_name']);
+					$email=htmlspecialchars($_POST['email']);
+					$password=htmlspecialchars($_POST['password']);
+					$query = mysqli_query($con, "UPDATE admin SET full_name='".$full_name."', email='".$email."', password='".$password."' WHERE id='".$row['id']."'");
+					if($query)
+					{
+						$message = "Зміни збережено!";
+						header("Refresh:0");
+					}
+					else
+						$message = "Зміни не були збережені!";
+				}
+				else
+					$message = "That email already exists! Please try another one!";
+			}
+		}else {
+			$message = "All fields are required!";
+		}
+	}
+	if(isset($_POST['cancel'])){
+		$query=mysqli_query($con, "SELECT * FROM admin WHERE email = '".$_SESSION["session_username"]."' ");
+		$row=mysqli_fetch_assoc($query);
+		if($row['role'] == "customer")
+			header("Location: intropage.php");
+		else
+			header("Location: intropageAdmin.php");
+	} 
+	?>
+
+	
+	<?php if (!empty($message)) {echo "<p class='error'>" . "MESSAGE: ". $message . "</p>";} ?>
+	
+
+	<div id="logout">
+        <p><a href="intropage.php">На головну</a></p>
+        <p><a href="logout.php">Вийти</a> з системи</p>
+    </div>
+
+
+		<?php include("includes/footer.php"); ?>
+    
+    <?php endif; ?>
