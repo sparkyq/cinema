@@ -1,0 +1,122 @@
+#cinema
+<?php
+
+session_start();
+
+if(!isset($_SESSION["session_username"])):
+    header("login.php");
+else:
+    ?>
+    
+    <?php include("includes/header.php"); ?>
+
+    <div id="welcome">
+        <h2>Welcome, <span>
+
+            <?php 
+            $query = mysqli_query($con, "SELECT * FROM admin WHERE username = '".$_SESSION['session_username']."'");
+            $row=mysqli_fetch_assoc($query);
+            echo $row['username'];
+            ?>!
+
+        </span></h2>
+    </div>
+
+
+    <div id="movie">
+        <h2> Film</h2>
+
+        <?php 
+        $query =mysqli_query($con, "SELECT * FROM movie");
+        echo "<table border='1' align = 'center'>
+        <tr>
+        <th>Id</th>
+        <th>Name</th>
+        <th>Data&Time</th>
+        <th>Place</th>
+
+          
+        </tr>";
+        $movie = array();
+        while($row=mysqli_fetch_assoc($query))
+            {
+                array_push($movie, $row['name'] . ".php");
+                echo "<tr>";
+                echo "<td>" . $row['id'] . "</td>";
+                echo "<td>" . "<p><a href=". "../movie/" . $row['id'] .".php" . ">" . $row['name'] . "</a></p>" . "</td>";
+                echo "<td>" . $row['data_&_time'] . "</td>";
+                if($row['pick_a_place'] == 1)
+                {
+                    echo "<td>" . "yes" . "</td>";
+                }
+                else{
+                    echo "<td>" . "no" . "</td>";
+                }
+               
+                 
+            }
+        echo "</table>";
+        ?>
+    </div>
+
+    <div class="container mmovie">
+    <div id="login">
+         
+        <form action="movie.php" id="movieform" method="post" name="movieform">
+            <h2>Додати фільм</h2>
+            <p><label for="name">ID<br>
+                <input class="input" id="id" name="id" size="32"  type="text" value=""></label></p>
+
+            <p><label for="name">Name<br>
+                <input class="input" id="name" name="name" size="32"  type="text" value=""></label></p>
+                
+                <p><label for="data">Date&Time<br>
+                    <input type="date" id="start" name="start" value=" "  min="2021-01-01" max="2021-12-31"></label></p>
+
+                    <p class="submit"><input class="button" id="movie" name="movie" type="submit" value="Додати"></p>
+                </form>
+            </div>
+        </div>
+
+
+
+        <?php
+
+        if(isset($_POST["movie"])){
+
+            if(!empty($_POST['name']) && !empty($_POST['start'])) {
+                $id= htmlspecialchars($_POST['id']);
+                $name= htmlspecialchars($_POST['name']);
+                $data = htmlspecialchars($_POST['start']);
+               
+                    $sql=sprintf("INSERT INTO  `movie` (`id`, `name`, `data_&_time`)
+                    VALUES('%s', '%s', '%s')", $id, $name, $data);
+                    $result=mysqli_query($con, $sql);
+                    if($result){
+                        $message = "Film Successfully Ordered" . $data;
+                    } else {
+                        $message = "Failed!";
+
+                    }
+            } 
+        }
+        ?>
+
+        <?php if (!empty($message)) 
+        {
+            echo "<p class='error'>" . "MESSAGE: ". $message . "</p>";
+        };
+        ?>
+
+   
+
+
+        <div id="logout">
+        <p><a href="intropage.php">На головну</a></p>
+        <p><a href="logout.php">Вийти</a> з системи</p>
+    </div>
+
+    
+    <?php include("includes/footer.php"); ?>
+    
+    <?php endif; ?>
