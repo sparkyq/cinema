@@ -1,0 +1,116 @@
+<?php
+
+session_start();
+
+if(!isset($_SESSION["session_username"])):
+    header("login.php");
+else:
+    ?>
+    
+    <?php include("includes/header.php"); ?>
+
+    
+    <div id="buyticket">
+        <h2> Tickets </h2>
+
+        <?php 
+        $query =mysqli_query($con, "SELECT * FROM buyticket");
+        echo "<table border='1' align = 'center'>
+        <tr>
+        <th>Id</th>
+        <th>Movie</th>
+        <th>Username</th>
+        <th>Ticket</th>
+        <th>Data&Time</th>
+        <th>Delete</th>
+        </tr>";
+        $buyticket = array();
+        while($row=mysqli_fetch_assoc($query))
+            {
+                array_push($buyticket, $row['name'] . ".php");
+                echo "<tr>";
+                echo "<td>" . $row['id'] . "</td>";
+                echo "<td>" . "<p><a href=". "../buyticket/" . $row['id'] .".php" . ">" . $row['name'] . "</a></p>" . "</td>";
+                echo "<td>" . $row['username'] . "</td>";
+                echo "<td>" . $row['ticket'] . "</td>";
+                echo "<td>" . $row['data_&_time'] . "</td>";
+                                 
+            }
+        echo "</table>";
+        ?>
+    </div>
+
+    <div class="container mbuyticket">
+    <div id="login">
+         
+        <form action="buyticket.php" id="buyticketform" method="post" name="buyticketform">
+            <h2>Купити квиток</h2>
+            <p><label for="name">ID<br>
+                <input class="input" id="id" name="id" size="32"  type="text" value=""></label></p>
+
+            <p><label for="name">Movie<br>
+                <input class="input" id="name" name="name" size="32"  type="text" value=""></label></p>
+
+                 <p><label for="name">Username<br>
+                <input class="input" id="name" name="username" size="32"  type="text" value=""></label></p>
+
+                 <p><label for="name">Ticket<br>
+                <input class="input" id="name" name="ticket" size="32"  type="text" value=""></label></p>
+                
+                <p><label for="data">Date&Time<br>
+                    <input type="date" id="start" name="start" value=" "  min="2021-01-01" max="2021-12-31"></label></p>
+
+                    <p class="submit"><input class="button" id="buyticket" name="buyticket" type="submit" value="Додати"></p>
+                </form>
+            </div>
+        </div>
+
+
+
+        <?php
+
+        if(isset($_POST["buyticket"])){
+
+            if(!empty($_POST['name']) && !empty($_POST['username']) && !empty($_POST['ticket']) && !empty($_POST['start'])) {
+                $id= htmlspecialchars($_POST['id']);
+                $name= htmlspecialchars($_POST['name']);
+                $username= htmlspecialchars($_POST['username']);
+                $ticket= htmlspecialchars($_POST['ticket']);
+                $data = htmlspecialchars($_POST['start']);
+               
+                    $sql=sprintf("INSERT INTO  `buyticket` (`id`, `name`, `username`, `ticket`, `data_&_time`)
+                    VALUES('%s', '%s', '%s', '%s', '%s')", $id, $name, $username, $ticket, $data);
+                    $result=mysqli_query($con, $sql);
+                    if($result){
+                        $message = "Ticket Successfully Ordered" . $data;
+                    } else {
+                        $message = "Failed!";
+
+                    }
+            } 
+        }
+
+        ?>
+
+        <?php if (!empty($message)) 
+        {
+            echo "<p class='error'>" . "MESSAGE: ". $message . "</p>";
+        };
+        ?>
+
+   
+
+
+        <div id="logout">
+        <p><a href="intropage.php">На головну</a></p>
+        <p><a href="logout.php">Вийти</a> з системи</p>
+    </div>
+
+    
+    <?php include("includes/footer.php"); ?>
+    
+    <?php endif; ?>
+
+
+
+
